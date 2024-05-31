@@ -1,4 +1,4 @@
-# VTU Result Scraper
+# VTU Result Scraper ( 2018 Scheme )
 
 The VTU Result Scraper is a Python application designed to automate the fetching of exam results from the VTU (Visvesvaraya Technological University) official results website. This project utilizes various modules to handle tasks such as web scraping, image processing for CAPTCHA recognition, and database operations.
 
