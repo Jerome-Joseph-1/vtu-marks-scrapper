@@ -43,7 +43,7 @@ The script can be executed with various commands depending on the intended opera
 python3 scrapper.py fetch --folder semester6 --sem 6 --start 1
 
 # Insert results into a MongoDB database from a specified folder
-python3 scrapper.py insert --folder results --collection semester6
+python3 scrapper.py insert --folder semester6 --collection semester6
 ```
 
 ### Commands and Options
