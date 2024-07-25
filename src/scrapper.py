@@ -153,7 +153,7 @@ def fetch_results(folder="results", number=1):
             cookie, token, captchaCode = init_connection(number)
             failureCount += 1
         
-        if failureCount > 5:
+        if failureCount > 4:
             failed_numbers.append(number)
             logger.error(f"Failed: Skipping USN : {get_usn(number)}")
             number, failureCount = get_next_number(number)
@@ -161,20 +161,22 @@ def fetch_results(folder="results", number=1):
 def fetch_individual(folder="results" , number = 1):
     cookie, token, captchaCode = init_connection(number)
     failureCount = 0
-    logger.info(f"Trying to Download results of : {get_usn(number)}")
-    response = download_result(number, token, cookie, captchaCode)
-    if response.status_code == 200 and get_usn(number) in response.text:
-        logger.info("Download Successful")
+    while(1):
+        logger.info(f"Trying to Download results of : {get_usn(number)}")
+        response = download_result(number, token, cookie, captchaCode)
+        if response.status_code == 200 and get_usn(number) in response.text:
+            logger.info("Download Successful")
 
-        with open(f'{folder}/results_{get_usn(number)}.html', 'wb') as f:
-            f.write(response.content)
-            failureCount = 0
-    else:
-        logger.error(f"Failed: Retrying with new Captcha ... Attempt {failureCount + 1}")
-        cookie, token, captchaCode = init_connection(number)
-        failureCount += 1
-    if failureCount > 5:
-        logger.info(f"Failed to download results for : {get_usn(args.number)}" )
+            with open(f'{folder}/results_{get_usn(number)}.html', 'wb') as f:
+                f.write(response.content)
+                break
+        else:
+            logger.error(f"Failed: Retrying with new Captcha ... Attempt {failureCount + 1}")
+            cookie, token, captchaCode = init_connection(number)
+            failureCount += 1
+        if failureCount > 4:
+            logger.info(f"Failed to download results for : {get_usn(number)}" )
+            break
 
 def insert_to_db(folder="result", collection="dump"):
     db = get_database()
