@@ -160,8 +160,8 @@ def fetch_results(folder="results", number=1):
 
 def fetch_individual(folder="results" , number = 1):
     cookie, token, captchaCode = init_connection(number)
-    failureCount = 0
-    while(1):
+    failureCount = 5
+    while(failureCount > 0):
         logger.info(f"Trying to Download results of : {get_usn(number)}")
         response = download_result(number, token, cookie, captchaCode)
         if response.status_code == 200 and get_usn(number) in response.text:
@@ -171,12 +171,12 @@ def fetch_individual(folder="results" , number = 1):
                 f.write(response.content)
                 break
         else:
-            logger.error(f"Failed: Retrying with new Captcha ... Attempt {failureCount + 1}")
+            logger.error(f"Failed: Retrying with new Captcha ... Attempt {5 - failureCount + 1}")
             cookie, token, captchaCode = init_connection(number)
-            failureCount += 1
-        if failureCount > 4:
+            failureCount -= 1
+        if failureCount == 0:
             logger.info(f"Failed to download results for : {get_usn(number)}" )
-            break
+        
 
 def insert_to_db(folder="result", collection="dump"):
     db = get_database()
