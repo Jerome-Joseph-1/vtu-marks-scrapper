@@ -48,6 +48,7 @@ python3 scrapper.py insert --folder semester6 --collection semester6
 
 ### Commands and Options
 - `fetch`: Fetch results from the VTU website.
+- `fetch_one` : Fetch individual result from the VTU website
 - `insert`: Insert results into a database.
 - `manual`: Manually fetch results for specific USNs.
 - `merge`: Merge results from multiple semesters.

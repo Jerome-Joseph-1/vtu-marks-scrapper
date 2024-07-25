@@ -153,10 +153,30 @@ def fetch_results(folder="results", number=1):
             cookie, token, captchaCode = init_connection(number)
             failureCount += 1
         
-        if failureCount > 5:
+        if failureCount > 4:
             failed_numbers.append(number)
             logger.error(f"Failed: Skipping USN : {get_usn(number)}")
             number, failureCount = get_next_number(number)
+
+def fetch_individual(folder="results" , number = 1):
+    cookie, token, captchaCode = init_connection(number)
+    failureCount = 5
+    while(failureCount > 0):
+        logger.info(f"Trying to Download results of : {get_usn(number)}")
+        response = download_result(number, token, cookie, captchaCode)
+        if response.status_code == 200 and get_usn(number) in response.text:
+            logger.info("Download Successful")
+
+            with open(f'{folder}/results_{get_usn(number)}.html', 'wb') as f:
+                f.write(response.content)
+                break
+        else:
+            logger.error(f"Failed: Retrying with new Captcha ... Attempt {5 - failureCount + 1}")
+            cookie, token, captchaCode = init_connection(number)
+            failureCount -= 1
+        if failureCount == 0:
+            logger.info(f"Failed to download results for : {get_usn(number)}" )
+        
 
 def insert_to_db(folder="result", collection="dump"):
     db = get_database()
@@ -182,6 +202,10 @@ def main(args):
             os.makedirs(args.folder)
         fetch_results(folder=args.folder, number=int(args.start))
         logger.info(f"Failed to download results for : {', '.join(str(i) for i in failed_numbers)}" )
+    elif args.action == 'fetch_one':
+        if not os.path.exists(args.folder):
+            os.makedirs(args.folder)
+        fetch_individual(folder=args.folder, number=int(args.start))
     elif args.action == 'insert':
         insert_to_db(folder=args.folder, collection=args.collection)
     elif args.action == 'manual':
@@ -198,7 +222,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage result operations.")
     
     # Add arguments to the parser
-    parser.add_argument('action', choices=['fetch', 'insert', 'exit', 'manual', 'merge'], help='Action to perform.')
+    parser.add_argument('action', choices=['fetch_one', 'fetch', 'insert', 'exit', 'manual', 'merge'], help='Action to perform.')
     parser.add_argument('--folder', default='results', help='Folder to process (default: results)')
     parser.add_argument('--start', default=1, help='Starting Number (default: 1)')
     parser.add_argument('--sem', default="2", help='Semester (default: 2)')
